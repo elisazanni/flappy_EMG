@@ -36,11 +36,9 @@ Per utilizzare il sistema, è essenziale avviare entrambi gli script contemporan
 
 ### 2. Attivazione e Accoppiamento dei Sensori
 
-**Sblocco dei Sensori:** Estrai i sensori dalla base di ricarica.
+**Sblocco dei Sensori:** Estrai i sensori dalla base di ricarica. Inizialmente, il sensore mostrerà una luce viola (modalità sleep).
 
-    Inizialmente, il sensore mostrerà una luce viola (modalità sleep).
-
-**Attivazione:** Passa il sensore sul magnetometro della base (di solito una piccola area designata). La luce cambierà in blu (ricerca base) o arancione/verde (accoppiato). Questo li rende "sbloccati" e attivi.
+**Attivazione:** Passa il sensore sul magnetometro della base (una piccola area designata). La luce cambierà in blu e arancione (lampeggiante). Questo li rende "sbloccati" e attivi.
 
 **Configurazione Software:** Lo script emg_sensor_flag.py gestirà la configurazione software, connettendosi alla base, scoprendo i sensori attivi e impostando la modalità di campionamento su 'EMG raw (2148 Hz)'.
 
