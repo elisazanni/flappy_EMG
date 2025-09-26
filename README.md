@@ -1,6 +1,6 @@
-# 🦅 EMG-Controlled Bird Game (Angry Birds Style)
+# 🦅 EMG-Controlled Bird Game (Flappy Birds Style)
 
-Questo progetto unisce l'acquisizione di dati elettromiografici (EMG) con un semplice gioco in stile Angry Birds, permettendo all'utente di controllare l'uccellino con le contrazioni muscolari.
+Questo progetto unisce l'acquisizione di dati elettromiografici (EMG) con un semplice gioco in stile Flappy Birds, permettendo all'utente di controllare l'uccellino con le contrazioni muscolari.
 
 ---
 
@@ -28,12 +28,23 @@ La repository è composta da due script Python principali che devono essere eseg
 
 Per utilizzare il sistema, è essenziale avviare entrambi gli script contemporaneamente:
 
-### 1. Preparazione dei Sensori Delsys
+### 1. Preparazione Fisica della Base
 
-1.  **Sblocco:** Assicurati che i sensori Delsys siano sbloccati e accoppiati tramite la loro base di ricarica/comunicazione prima di eseguire il codice.
-2.  **Configurazione:** Lo script `emg_sensor_flag.py` si connetterà e configurerà i sensori in modalità 'EMG raw (2148 Hz)'.
+**Connessione Base:** Collega la Base di Ricarica (o Delsys Trigno Base Station) al PC tramite USB. Assicurati anche che l'unità Trigno Center (il componente che gestisce il wireless) sia collegata.
 
-### 2. Avvio degli Script
+**Accensione:** Accendi l'unità Trigno Center. La luce di stato dovrebbe cambiare, passando generalmente da blu ad arancione, indicando che è alimentata e in attesa di connessione.
+
+### 2. Attivazione e Accoppiamento dei Sensori
+
+**Sblocco dei Sensori:** Estrai i sensori dalla base di ricarica.
+
+    Inizialmente, il sensore mostrerà una luce viola (modalità sleep).
+
+**Attivazione:** Passa il sensore sul magnetometro della base (di solito una piccola area designata). La luce cambierà in blu (ricerca base) o arancione/verde (accoppiato). Questo li rende "sbloccati" e attivi.
+
+**Configurazione Software:** Lo script emg_sensor_flag.py gestirà la configurazione software, connettendosi alla base, scoprendo i sensori attivi e impostando la modalità di campionamento su 'EMG raw (2148 Hz)'.
+
+### 3. Avvio degli Script
 
 Apri due finestre di terminale separate nella directory principale del progetto:
 
