@@ -92,14 +92,14 @@ class TrignoRecorder:
                         self.switch = True
                         self.last_switch_time = current_time
                         write_state_to_file(self.switch) # Aggiorna il file
-                        #print(f"[SWITCH ON] EMG {guid} ha superato soglia {soglia:.4f}")
+                        print(f"[SWITCH ON] EMG {guid} ha superato soglia {soglia:.4f}")
 
                     # SWITCH OFF
                     elif value <= soglia and self.switch and (current_time - self.last_switch_time > self.switch_delay):
                         self.switch = False
                         self.last_switch_time = current_time
                         write_state_to_file(self.switch) # Aggiorna il file
-                        #print(f"[SWITCH OFF]")
+                        print(f"[SWITCH OFF]")
 
 
     # Start recording sensor data
@@ -154,8 +154,7 @@ class TrignoRecorder:
 # -----------------------------------
 
 if __name__ == "__main__":
-    # Inserisci qui il max_amp calcolato dallo script 2
-    max_amp_calcolato = 0.2
+    max_amp_calcolato = 0.4
 
     asyncio.run(TrignoRecorder("192.168.0.156", max_amp_calcolato).run())
 

@@ -1,12 +1,11 @@
 import pygame, sys, random, os
 
-score = -1
-
+score = 0
 
 def read_emg_state_from_file():
     file_path = "emg_state.txt"
     if not os.path.exists(file_path):
-        return
+        return False 
     try:
         with open(file_path, "r") as f:
             state_str = f.read().strip()
@@ -21,14 +20,14 @@ def draw_floor():
 
 def create_pipe():
     random_pipe_pos = random.choice(pipe_height)
-    # Aumenta la distanza tra i tubi usando il moltiplicatore
+    # DISTANZA TRA TUBI A DX E SX (700 POCO?)
     bottom_pipe = pipe_surface.get_rect(midtop=(700, random_pipe_pos))
-    top_pipe = pipe_surface.get_rect(midbottom=(700, random_pipe_pos - (400)))
+    # DISTANZA TRA TUBO SU E TUBO GIU' A 400 PIXEL (MOLTO LONTANI)
+    top_pipe = pipe_surface.get_rect(midbottom=(700, random_pipe_pos - 400)) 
     return bottom_pipe, top_pipe
 
 def move_pipes(pipes):
     for pipe in pipes:
-        # Rallenta i tubi usando il fattore di velocità
         pipe.centerx -= 5 * game_speed_factor
     visible_pipes = [pipe for pipe in pipes if pipe.right > -50]
     return visible_pipes
@@ -46,25 +45,27 @@ def check_collision(pipes):
         if bird_rect.colliderect(pipe):
             return False
 
+    #condizione di "morte" se si colpisce il pavimento (>= 900) o si esce sopra (<= -100)
     if bird_rect.top <= -100 or bird_rect.bottom >= 900:
+        
         return False
     return True
 
 pygame.init()
 screen = pygame.display.set_mode((576, 1024))
 clock = pygame.time.Clock()
-game_font = pygame.font.Font('04B_19.ttf',40)
+try:
+    game_font = pygame.font.Font('04B_19.ttf',40)
+except pygame.error:
+    game_font = pygame.font.SysFont('arial', 40)
 
-# Variabili di gioco
-gravity = 0.4
+gravity = 0.3
 bird_movement = 0
-game_active = True
+game_active = False
 can_score = True
 
-# Aggiungi le variabili di velocità e distanza
-game_speed_factor = 0.6  # Modifica questo valore per cambiare la velocità del gioco (es. 0.5 per più lento)
+game_speed_factor = 0.5  # VELOCITA' DEL GIOCO
 
-# Superfici del gioco
 bg_surface = pygame.image.load('assets/background-day.png').convert()
 bg_surface = pygame.transform.scale2x(bg_surface)
 
@@ -89,49 +90,51 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE and game_active:
-                bird_movement = 0
-                bird_movement -= 12
-            if event.key == pygame.K_SPACE and game_active == False:
-                game_active = True
-                pipe_list.clear()
-                bird_rect.center = (100,512)
-                bird_movement = 0
-                score = 0     
-
-        if event.type == SPAWNPIPE:
+            if event.key == pygame.K_SPACE:
+                if game_active:
+                    bird_movement = 0
+                    bird_movement -=9
+                else:
+                    # RIAVVIO (reset di tutto)
+                    game_active = True
+                    pipe_list.clear()
+                    bird_rect.center = (100,512)
+                    bird_movement = 0
+                    score = 0 
+        
+        if event.type == SPAWNPIPE and game_active:
             pipe_list.extend(create_pipe())
             score +=1
 
+    #LEGGO IL FILE EMG CON LO STATO
     if read_emg_state_from_file():
         if game_active:
             bird_movement = 0
-            bird_movement -= 5  #saltare
+            bird_movement -= 6      #QUANTO SALTARE
         else:
             game_active = True
             pipe_list.clear()
             bird_rect.center = (100, 512)
             bird_movement = 0
+            score = 0
+            
     screen.blit(bg_surface, (0, 0))
 
     if game_active:
-        # Muovi l'uccello
         bird_movement += gravity
         bird_rect.centery += bird_movement
         screen.blit(bird_surface, bird_rect)
-        game_active = check_collision(pipe_list)
-        if(not game_active):
-            score = 0
         
-
-        # Muovi e disegna i tubi
+        game_active = check_collision(pipe_list) 
+        
         pipe_list = move_pipes(pipe_list)
         draw_pipes(pipe_list)
-        print(score)
 
-    # Muovi il pavimento
-    floor_x_pos -= 1 * game_speed_factor
+    if game_active:
+        floor_x_pos -= 1 * game_speed_factor
+    
     draw_floor()
     if floor_x_pos <= -576:
         floor_x_pos = 0
@@ -139,6 +142,7 @@ while True:
     score_surface = game_font.render(str(int(score)),True,(255,255,255))
     score_rect = score_surface.get_rect(center = (288,100))
     screen.blit(score_surface,score_rect)
+    
     
     pygame.display.update()
     # Rallenta il clock in base al fattore di velocità
