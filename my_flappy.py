@@ -1,5 +1,42 @@
 import pygame, sys, random, os
 
+#TENERE LISTA GLOBALE PUNTEGGI MIGLIORI
+HIGH_SCORES = []
+HIGH_SCORE_FILE = "highscores.txt"
+MAX_HIGH_SCORES = 10
+
+def load_high_scores():
+    global HIGH_SCORES
+    try:
+        with open(HIGH_SCORE_FILE, "r") as f:
+            scores = [int(line.strip()) for line in f if line.strip().isdigit()]
+            scores.sort(reverse=True)
+            HIGH_SCORES = scores[:MAX_HIGH_SCORES]
+    except FileNotFoundError:
+        HIGH_SCORES = []
+    except Exception as e:
+        print(f"Errore nel caricamento dei punteggi: {e}")
+        HIGH_SCORES = []
+
+def save_high_scores():
+    try:
+        with open(HIGH_SCORE_FILE, "w") as f:
+            for s in HIGH_SCORES:
+                f.write(f"{s}\n")
+    except Exception as e:
+        print(f"Errore nel salvataggio dei punteggi: {e}")
+
+def update_high_scores(new_score):
+    global HIGH_SCORES
+    if new_score > 0:
+        HIGH_SCORES.append(new_score)
+        HIGH_SCORES.sort(reverse=True)
+        HIGH_SCORES = HIGH_SCORES[:MAX_HIGH_SCORES]
+        save_high_scores()
+        
+        
+        
+
 score = 0
 
 def read_emg_state_from_file():
@@ -47,11 +84,44 @@ def check_collision(pipes):
 
     #condizione di "morte" se si colpisce il pavimento (>= 900) o si esce sopra (<= -100)
     if bird_rect.top <= -100 or bird_rect.bottom >= 900:
-        
         return False
     return True
 
+
+def display_game_over_screen():
+    game_over_text = game_font.render("GAME OVER", True, (255, 0, 0))
+    game_over_rect = game_over_text.get_rect(center=(288, 200))
+    screen.blit(game_over_text, game_over_rect)
+
+    high_score_title = game_font.render("HIGHEST SCORES", True, (255, 255, 255))
+    high_score_rect = high_score_title.get_rect(center=(288, 300))
+    screen.blit(high_score_title, high_score_rect)
+    
+    y_pos = 350
+    for i, s in enumerate(HIGH_SCORES):
+        color = (255, 255, 255)
+        # EVIDENZIO IL PUNTEGGIO SE è IL TUO
+        if s == int(score) and i == HIGH_SCORES.index(s):
+            color = (255, 255, 0)
+
+        score_line = f"{i + 1}. {s}"
+        score_surface = game_font.render(score_line, True, color)
+        score_rect = score_surface.get_rect(center=(288, y_pos)) 
+        screen.blit(score_surface, score_rect)
+        y_pos += 40 #spazio tra le linee
+
+    restart_text = game_font.render("Premi SPAZIO per Riprovare", True, (255, 255, 255))
+    restart_rect = restart_text.get_rect(center=(288, 800))
+    screen.blit(restart_text, restart_rect)
+    
+    
+
+
+
+####################################################################################
 pygame.init()
+load_high_scores() 
+
 screen = pygame.display.set_mode((576, 1024))
 clock = pygame.time.Clock()
 try:
@@ -126,11 +196,23 @@ while True:
         bird_movement += gravity
         bird_rect.centery += bird_movement
         screen.blit(bird_surface, bird_rect)
+        new_game_active_state = check_collision(pipe_list) 
         
-        game_active = check_collision(pipe_list) 
+        if game_active and not new_game_active_state:
+            # IL GIOCO E' APPENA FINITO
+            update_high_scores(int(score))
+        
+        game_active = new_game_active_state
         
         pipe_list = move_pipes(pipe_list)
         draw_pipes(pipe_list)
+    else:
+        #STATO GAME OVER
+        screen.blit(bird_surface, bird_rect) 
+        
+        # Chiama la funzione per disegnare la schermata del Game Over
+        display_game_over_screen()
+
 
     if game_active:
         floor_x_pos -= 1 * game_speed_factor
